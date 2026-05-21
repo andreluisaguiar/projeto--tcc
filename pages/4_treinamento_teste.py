@@ -1,19 +1,21 @@
 """Página: Treinamento e Teste de Algoritmos."""
 
-import streamlit as st
+from __future__ import annotations
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
+import streamlit as st
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
-from src.models.registry import list_algorithms, get_display_name, get_algorithm
 from src.models.evaluator import avaliar_modelo, relatorio_para_dataframe
 from src.models.predictor import salvar_modelo
+from src.models.registry import get_algorithm, get_display_name, list_algorithms
 from src.preprocessing.text_processor import get_portuguese_stopwords
+from src.utils.db import obter_todos_tccs
 from src.utils.io_helpers import read_excel
-
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import LabelEncoder
 
 st.set_page_config(page_title="Treinamento e Teste", page_icon="🧪")
 
@@ -25,33 +27,40 @@ st.write(
 
 st.divider()
 
-uploaded_file = st.file_uploader("📁 Escolha um arquivo Excel", type="xlsx")
+data = None
+data_db = obter_todos_tccs(incluir_outliers=False, incluir_duplicadas=False)
+if not data_db.empty:
+    data = data_db
+    st.info(f"📊 Carregados {len(data)} registros limpos diretamente do SQLite.")
+else:
+    uploaded_file = st.file_uploader("📁 Escolha um arquivo Excel", type="xlsx")
+    if uploaded_file is not None:
+        data = read_excel(uploaded_file)
 
-if uploaded_file is not None:
-    data = pd.read_excel(uploaded_file)
-
-    # Filtrar registros irrelevantes
-    if "Engenharia" in data.columns:
-        eng_col = "Engenharia"
-    elif "engenharia" in data.columns:
+if data is not None:
+    if "engenharia" in data.columns:
         eng_col = "engenharia"
+    elif "Engenharia" in data.columns:
+        eng_col = "Engenharia"
     else:
-        st.error("❌ Coluna 'Engenharia' não encontrada no arquivo.")
+        st.error("❌ Coluna 'engenharia' não encontrada no arquivo.")
         st.stop()
 
-    if "Titulo" in data.columns:
-        tit_col = "Titulo"
-    elif "titulo" in data.columns:
+    if "titulo" in data.columns:
         tit_col = "titulo"
+    elif "Titulo" in data.columns:
+        tit_col = "Titulo"
+    elif "Título" in data.columns:
+        tit_col = "Título"
     else:
-        st.error("❌ Coluna 'Titulo' não encontrada no arquivo.")
+        st.error("❌ Coluna 'titulo' não encontrada no arquivo.")
         st.stop()
 
     data = data[data[eng_col] != "Não migrou"]
     X = data[tit_col]
     y = data[eng_col]
 
-    st.info(f"📊 {len(data)} registros carregados ({y.nunique()} classes)")
+    st.info(f"📊 {len(data)} registros utilizáveis carregados ({y.nunique()} classes)")
 
     # ─── Configurações ────────────────────────────────────────────────────
     col1, col2 = st.columns(2)

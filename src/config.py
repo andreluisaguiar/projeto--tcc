@@ -9,6 +9,7 @@ DATA_DIR = ROOT_DIR / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 MODELS_DIR = DATA_DIR / "models"
+DB_PATH = DATA_DIR / "raw_tccs.db"
 
 # Garante que os diretórios existem
 for _dir in (RAW_DATA_DIR, PROCESSED_DATA_DIR, MODELS_DIR):

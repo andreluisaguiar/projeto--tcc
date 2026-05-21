@@ -31,11 +31,15 @@ Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
 
 | Página | Descrição |
 |---|---|
+| ⚙️ **Gerenciamento de Dados** | Importe a base uma vez e mantenha os dados no SQLite |
+| 📊 **Dashboard** | Explore estatísticas interativas e nuvem de palavras dos temas |
 | 📥 **Coleta** | Extraia monografias diretamente do SIGAA |
 | 🧹 **Duplicatas** | Combine arquivos e remova registros duplicados |
 | 🔍 **Outliers** | Detecte títulos inconsistentes via similaridade semântica |
+| 🔎 **Busca Semântica** | Pesquise títulos por similaridade com spaCy |
 | 🧪 **Treinamento e Teste** | Compare algoritmos de ML com diferentes configurações |
 | 🎯 **Predição** | Treine modelos e preveja engenharias por título |
+| 🧾 **Relatórios** | Exporte um PDF consolidado com estatísticas do projeto |
 
 ---
 
@@ -51,6 +55,9 @@ Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
    Detecção de Outliers
         │
         ▼
+   Busca / Persistência SQLite
+        │
+        ▼
    Treinamento de Modelos
         │
         ▼
@@ -64,7 +71,9 @@ Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
 - **Interface**: Streamlit
 - **ML/NLP**: scikit-learn, XGBoost, spaCy, NLTK
 - **Scraping**: Selenium + ChromeDriver
-- **Dados**: pandas, openpyxl
+- **Dados**: pandas, openpyxl, SQLite
+- **Relatórios**: fpdf2
+- **Deploy**: Docker
 """)
 
 # Sidebar info

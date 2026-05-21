@@ -1,14 +1,16 @@
 """Página: Dashboard Analítico Interativo (Análise Descritiva)."""
 
-import streamlit as st
+from __future__ import annotations
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-import io
 
-from src.utils.io_helpers import read_excel
 from src.preprocessing.text_processor import get_portuguese_stopwords
+from src.utils.db import obter_todos_tccs
+from src.utils.io_helpers import read_excel
 
 st.set_page_config(page_title="Dashboard Analítico", page_icon="📊", layout="wide")
 
@@ -20,19 +22,26 @@ st.write(
 
 st.divider()
 
-# Carregar arquivo de dados para análise
-uploaded_file = st.file_uploader(
-    "📁 Envie o arquivo Excel para análise descritiva",
-    type=["xlsx"],
-    help="Envie um dataset de monografias limpo ou processado para gerar os gráficos.",
-)
+df = None
+df_db = obter_todos_tccs(incluir_outliers=False, incluir_duplicadas=False)
+if not df_db.empty:
+    df = df_db
+    st.info(f"📊 Carregados {len(df)} registros limpos diretamente do SQLite.")
+else:
+    uploaded_file = st.file_uploader(
+        "📁 Envie o arquivo Excel para análise descritiva",
+        type=["xlsx"],
+        help="Envie um dataset de monografias limpo ou processado para gerar os gráficos.",
+    )
+    if uploaded_file is not None:
+        df = read_excel(uploaded_file)
 
 @st.cache_data
-def carregar_dados_dashboard(file) -> pd.DataFrame:
-    df = pd.read_excel(file)
+def padronizar_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    df_temp = df_in.copy()
     # Padronizar nomes de colunas comuns
     rename_dict = {}
-    for col in df.columns:
+    for col in df_temp.columns:
         if col.lower() in ["titulo", "título"]:
             rename_dict[col] = "titulo"
         elif col.lower() in ["engenharia", "curso"]:
@@ -43,12 +52,12 @@ def carregar_dados_dashboard(file) -> pd.DataFrame:
             rename_dict[col] = "ano"
     
     if rename_dict:
-        df = df.rename(columns=rename_dict)
-    return df
+        df_temp = df_temp.rename(columns=rename_dict)
+    return df_temp
 
 
-if uploaded_file is not None:
-    df = carregar_dados_dashboard(uploaded_file)
+if df is not None:
+    df = padronizar_df(df)
     
     # Validar colunas essenciais
     colunas_obrigatorias = ["titulo"]
@@ -226,4 +235,4 @@ else:
             st.subheader("📂 Arquivos de exemplo detectados:")
             st.write("Você pode testar usando um dos arquivos já disponíveis na pasta de dados:")
             for f in excel_files:
-                st.info(f"Caminho do arquivo: `{f.relative_to(Path.cwd())}`")
+                st.info(f"Caminho do arquivo: `{f}`")
