@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+
+# Data files (not versioned — too large / potentially sensitive)
+data/raw/
+data/processed/
+data/models/
+*.xlsx
+*.pkl
+*.joblib
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Agent/tool directories
+.agents/
+.codex/
+
+# Temporary Chromium profiles
+/tmp/chromium-profile-*
