@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8501:8501"
+    environment:
+      CHROME_BINARY_PATH: /usr/bin/chromium
+      CHROMEDRIVER_PATH: /usr/bin/chromedriver
+    volumes:
+      - ./data:/app/data
