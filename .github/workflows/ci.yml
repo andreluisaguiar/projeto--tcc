@@ -1,0 +1,38 @@
+name: CI - Testes Automatizados
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - name: Baixar código fonte
+      uses: actions/checkout@v4
+
+    - name: Configurar Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip' # Cache das dependências instaladas via pip
+
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Baixar recursos de NLP
+      run: |
+        python -m spacy download pt_core_news_md
+        python -c "import nltk; nltk.download('stopwords')"
+
+    - name: Executar testes com pytest
+      run: |
+        pytest

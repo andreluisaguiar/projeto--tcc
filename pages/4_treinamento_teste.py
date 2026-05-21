@@ -85,32 +85,57 @@ if uploaded_file is not None:
             kwargs["learning_rate"] = st.slider("Taxa de aprendizado", 0.01, 0.3, 0.1)
             kwargs["subsample"] = st.slider("Subamostra", 0.5, 1.0, 0.8)
 
+    # Inicializar ou carregar estado do treinamento
+    if "trained_model_info" not in st.session_state:
+        st.session_state["trained_model_info"] = None
+
     if st.button("🚀 Treinar e Avaliar", type="primary"):
         with st.spinner(f"Treinando {get_display_name(algo_selecionado)}..."):
-            # Pré-processamento
-            stop_words = get_portuguese_stopwords()
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=test_size, random_state=42
-            )
+            try:
+                # Pré-processamento
+                stop_words = get_portuguese_stopwords()
+                X_train, X_test, y_train, y_test = train_test_split(
+                    X, y, test_size=test_size, random_state=42
+                )
 
-            tfidf = TfidfVectorizer(stop_words=stop_words, max_features=5000)
-            X_train_tfidf = tfidf.fit_transform(X_train)
-            X_test_tfidf = tfidf.transform(X_test)
+                tfidf = TfidfVectorizer(stop_words=stop_words, max_features=5000)
+                X_train_tfidf = tfidf.fit_transform(X_train)
+                X_test_tfidf = tfidf.transform(X_test)
 
-            # Treinar
-            label_encoder = LabelEncoder()
-            y_train_encoded = label_encoder.fit_transform(y_train)
-            y_test_encoded = label_encoder.transform(y_test)
+                # Treinar
+                label_encoder = LabelEncoder()
+                y_train_encoded = label_encoder.fit_transform(y_train)
+                y_test_encoded = label_encoder.transform(y_test)
 
-            modelo = get_algorithm(algo_selecionado, **kwargs)
-            modelo.fit(X_train_tfidf, y_train_encoded)
+                modelo = get_algorithm(algo_selecionado, **kwargs)
+                modelo.fit(X_train_tfidf, y_train_encoded)
 
-            # Avaliar
-            resultado = avaliar_modelo(modelo, label_encoder, X_test_tfidf, y_test)
+                # Avaliar
+                resultado = avaliar_modelo(modelo, label_encoder, X_test_tfidf, y_test)
+                
+                # Salvar no session_state
+                st.session_state["trained_model_info"] = {
+                    "modelo": modelo,
+                    "tfidf": tfidf,
+                    "label_encoder": label_encoder,
+                    "resultado": resultado,
+                    "algo_nome": get_display_name(algo_selecionado)
+                }
+                st.success(f"✅ Treinamento de {get_display_name(algo_selecionado)} concluído com sucesso!")
+            except Exception as e:
+                st.error(f"❌ Erro durante o treinamento: {e}")
+                st.session_state["trained_model_info"] = None
 
-        # ─── Resultados ───────────────────────────────────────────────────
-        st.success(f"✅ Treinamento concluído!")
+    # Exibir resultados fora do bloco do botão principal
+    model_info = st.session_state["trained_model_info"]
+    if model_info is not None:
+        resultado = model_info["resultado"]
+        label_encoder = model_info["label_encoder"]
+        modelo = model_info["modelo"]
+        tfidf = model_info["tfidf"]
 
+        st.divider()
+        st.subheader(f"📈 Resultados da Avaliação — {model_info['algo_nome']}")
         st.metric("Acurácia", f"{resultado['acuracia']:.2%}")
 
         # Relatório de classificação
@@ -133,14 +158,18 @@ if uploaded_file is not None:
         ax.set_xlabel("Previsões")
         ax.set_ylabel("Valores Reais")
         st.pyplot(fig)
+        plt.close(fig) # Fechar figura para liberar RAM
 
         # Salvar modelo
         st.divider()
-        st.subheader("💾 Salvar Modelo")
+        st.subheader("💾 Salvar Modelo Treinado")
         save_path = st.text_input(
             "Caminho do arquivo",
             value="data/models/modelo_classificacao.joblib",
         )
         if st.button("💾 Salvar"):
-            saved = salvar_modelo(modelo, tfidf, label_encoder, filepath=save_path)
-            st.success(f"✅ Modelo salvo em: {saved}")
+            try:
+                saved = salvar_modelo(modelo, tfidf, label_encoder, filepath=save_path)
+                st.success(f"✅ Modelo salvo com sucesso em: `{saved}`")
+            except Exception as e:
+                st.error(f"❌ Erro ao salvar o modelo: {e}")

@@ -1,0 +1,16 @@
+streamlit
+pandas
+openpyxl
+selenium
+spacy
+scikit-learn
+xgboost
+imbalanced-learn
+nltk
+joblib
+seaborn
+matplotlib
+numpy
+plotly
+wordcloud
+pytest

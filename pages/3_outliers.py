@@ -17,6 +17,11 @@ st.divider()
 
 uploaded_file = st.file_uploader("📁 Envie o arquivo Excel", type=["xlsx"])
 
+@st.cache_data
+def cached_detectar_outliers(df: pd.DataFrame, titulo_col: str, engenharia_col: str, limiar: float):
+    return detectar_outliers(df, titulo_col, engenharia_col, limiar=limiar)
+
+
 if uploaded_file is not None:
     df = pd.read_excel(uploaded_file)
 
@@ -46,7 +51,7 @@ if uploaded_file is not None:
 
         if st.button("🔍 Detectar Outliers", type="primary"):
             with st.spinner("Calculando similaridades semânticas... Isso pode levar alguns segundos."):
-                df_outliers, df_sem_outliers = detectar_outliers(
+                df_outliers, df_sem_outliers = cached_detectar_outliers(
                     df, titulo_col, engenharia_col, limiar=limiar
                 )
 

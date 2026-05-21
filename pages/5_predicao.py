@@ -20,6 +20,11 @@ st.divider()
 
 uploaded_file = st.file_uploader("📁 Envie o arquivo Excel", type=["xlsx"])
 
+@st.cache_resource
+def cached_treinar_pipeline_predicao(df: pd.DataFrame):
+    return treinar_pipeline_predicao(df)
+
+
 if uploaded_file is not None:
     df = pd.read_excel(uploaded_file)
 
@@ -34,17 +39,22 @@ if uploaded_file is not None:
     st.subheader("📊 Distribuição das Engenharias")
     st.bar_chart(df["engenharia"].value_counts())
 
+    # Inicializar ou carregar resultado do cache / session_state
+    resultado = None
+    if "resultado_predicao" in st.session_state:
+        resultado = st.session_state["resultado_predicao"]
+
     if st.button("🚀 Treinar Modelos", type="primary"):
-        with st.spinner("Treinando modelos (Random Forest + XGBoost)... Pode levar alguns segundos."):
+        with st.spinner("Treinando/Carregando modelos (Random Forest + XGBoost)..."):
             try:
-                resultado = treinar_pipeline_predicao(df)
+                # Usar a versão cacheada
+                resultado = cached_treinar_pipeline_predicao(df)
+                st.session_state["resultado_predicao"] = resultado
             except ValueError as e:
                 st.error(f"❌ {e}")
                 st.stop()
 
-        # Salvar no session_state para uso posterior
-        st.session_state["resultado_predicao"] = resultado
-
+    if resultado is not None:
         # Exibir resultados
         st.success("✅ Treinamento concluído!")
 

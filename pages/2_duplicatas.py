@@ -1,6 +1,7 @@
 """Página: Remoção de Duplicatas."""
 
 import streamlit as st
+import pandas as pd
 from src.preprocessing.deduplication import remover_duplicatas
 from src.utils.io_helpers import merge_excel_files, dataframe_to_excel_buffer
 
@@ -19,15 +20,29 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True,
 )
 
+@st.cache_data
+def cached_merge_excel_files(files_names: list[str], _uploaded_files) -> pd.DataFrame:
+    # Recebemos files_names para usar como chave de cache do Streamlit,
+    # e _uploaded_files com prefixo sublinhado para que o Streamlit não tente fazer o hash dos file-like objects diretamente.
+    return merge_excel_files(_uploaded_files)
+
+
+@st.cache_data
+def cached_remover_duplicatas(df: pd.DataFrame) -> pd.DataFrame:
+    return remover_duplicatas(df)
+
+
 if uploaded_files:
+    # Usamos os nomes dos arquivos e tamanhos como chave estável para o cache
+    file_keys = [f"{f.name}_{f.size}" for f in uploaded_files]
     with st.spinner("Carregando e combinando arquivos..."):
-        df_combinado = merge_excel_files(uploaded_files)
+        df_combinado = cached_merge_excel_files(file_keys, uploaded_files)
 
     st.subheader(f"📊 Dados Combinados ({len(df_combinado)} linhas)")
     st.dataframe(df_combinado, use_container_width=True)
 
     if st.button("🧹 Remover Duplicatas", type="primary"):
-        df_sem_duplicatas = remover_duplicatas(df_combinado)
+        df_sem_duplicatas = cached_remover_duplicatas(df_combinado)
         removidas = len(df_combinado) - len(df_sem_duplicatas)
 
         if removidas > 0:
