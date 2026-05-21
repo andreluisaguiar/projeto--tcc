@@ -13,4 +13,5 @@ matplotlib
 numpy
 plotly
 wordcloud
+fpdf2
 pytest
