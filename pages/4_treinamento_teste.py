@@ -17,9 +17,9 @@ from src.preprocessing.text_processor import get_portuguese_stopwords
 from src.utils.db import obter_todos_tccs
 from src.utils.io_helpers import read_excel
 
-st.set_page_config(page_title="Treinamento e Teste", page_icon="🧪")
+st.set_page_config(page_title="Treinamento e Teste")
 
-st.header("🧪 Treinamento e Teste de Algoritmos")
+st.header("Treinamento e Teste de Algoritmos")
 st.write(
     "Compare diferentes algoritmos de Machine Learning com diferentes "
     "configurações de treino/teste."
@@ -31,36 +31,36 @@ data = None
 data_db = obter_todos_tccs(incluir_outliers=False, incluir_duplicadas=False)
 if not data_db.empty:
     data = data_db
-    st.info(f"📊 Carregados {len(data)} registros limpos diretamente do SQLite.")
+    st.info(f"Carregados {len(data)} registros limpos diretamente do SQLite.")
 else:
-    uploaded_file = st.file_uploader("📁 Escolha um arquivo Excel", type="xlsx")
+    uploaded_file = st.file_uploader("Escolha um arquivo Excel", type="xlsx")
     if uploaded_file is not None:
         data = read_excel(uploaded_file)
 
 if data is not None:
-    if "engenharia" in data.columns:
+    if "engenharia"in data.columns:
         eng_col = "engenharia"
-    elif "Engenharia" in data.columns:
+    elif "Engenharia"in data.columns:
         eng_col = "Engenharia"
     else:
-        st.error("❌ Coluna 'engenharia' não encontrada no arquivo.")
+        st.error("Coluna 'engenharia' não encontrada no arquivo.")
         st.stop()
 
-    if "titulo" in data.columns:
+    if "titulo"in data.columns:
         tit_col = "titulo"
-    elif "Titulo" in data.columns:
+    elif "Titulo"in data.columns:
         tit_col = "Titulo"
-    elif "Título" in data.columns:
+    elif "Título"in data.columns:
         tit_col = "Título"
     else:
-        st.error("❌ Coluna 'titulo' não encontrada no arquivo.")
+        st.error("Coluna 'titulo' não encontrada no arquivo.")
         st.stop()
 
     data = data[data[eng_col] != "Não migrou"]
     X = data[tit_col]
     y = data[eng_col]
 
-    st.info(f"📊 {len(data)} registros utilizáveis carregados ({y.nunique()} classes)")
+    st.info(f"{len(data)} registros utilizáveis carregados ({y.nunique()} classes)")
 
     # ─── Configurações ────────────────────────────────────────────────────
     col1, col2 = st.columns(2)
@@ -68,7 +68,7 @@ if data is not None:
     with col1:
         algos = list_algorithms()
         algo_selecionado = st.selectbox(
-            "🤖 Algoritmo",
+            "Algoritmo",
             algos,
             format_func=get_display_name,
         )
@@ -76,7 +76,7 @@ if data is not None:
     with col2:
         test_size_options = [0.1, 0.2, 0.3]
         test_size = st.selectbox(
-            "📐 Split Treino/Teste",
+            "Split Treino/Teste",
             test_size_options,
             index=1,
             format_func=lambda x: f"{int((1 - x) * 100)}-{int(x * 100)}",
@@ -85,7 +85,7 @@ if data is not None:
     # Parâmetros específicos do XGBoost
     kwargs = {}
     if algo_selecionado == "xgboost":
-        st.subheader("⚙️ Parâmetros do XGBoost")
+        st.subheader("Parâmetros do XGBoost")
         col_a, col_b = st.columns(2)
         with col_a:
             kwargs["n_estimators"] = st.slider("Estimadores", 50, 200, 100, 10)
@@ -95,10 +95,10 @@ if data is not None:
             kwargs["subsample"] = st.slider("Subamostra", 0.5, 1.0, 0.8)
 
     # Inicializar ou carregar estado do treinamento
-    if "trained_model_info" not in st.session_state:
+    if "trained_model_info"not in st.session_state:
         st.session_state["trained_model_info"] = None
 
-    if st.button("🚀 Treinar e Avaliar", type="primary"):
+    if st.button("Treinar e Avaliar", type="primary"):
         with st.spinner(f"Treinando {get_display_name(algo_selecionado)}..."):
             try:
                 # Pré-processamento
@@ -130,9 +130,9 @@ if data is not None:
                     "resultado": resultado,
                     "algo_nome": get_display_name(algo_selecionado)
                 }
-                st.success(f"✅ Treinamento de {get_display_name(algo_selecionado)} concluído com sucesso!")
+                st.success(f"Treinamento de {get_display_name(algo_selecionado)} concluído com sucesso!")
             except Exception as e:
-                st.error(f"❌ Erro durante o treinamento: {e}")
+                st.error(f"Erro durante o treinamento: {e}")
                 st.session_state["trained_model_info"] = None
 
     # Exibir resultados fora do bloco do botão principal
@@ -144,16 +144,16 @@ if data is not None:
         tfidf = model_info["tfidf"]
 
         st.divider()
-        st.subheader(f"📈 Resultados da Avaliação — {model_info['algo_nome']}")
+        st.subheader(f"Resultados da Avaliação — {model_info['algo_nome']}")
         st.metric("Acurácia", f"{resultado['acuracia']:.2%}")
 
         # Relatório de classificação
-        st.subheader("📋 Relatório de Classificação")
+        st.subheader("Relatório de Classificação")
         report_df = relatorio_para_dataframe(resultado["relatorio"])
         st.dataframe(report_df, use_container_width=True)
 
         # Matriz de confusão
-        st.subheader("🔢 Matriz de Confusão")
+        st.subheader("Matriz de Confusão")
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.heatmap(
             resultado["matriz_confusao"],
@@ -171,14 +171,14 @@ if data is not None:
 
         # Salvar modelo
         st.divider()
-        st.subheader("💾 Salvar Modelo Treinado")
+        st.subheader("Salvar Modelo Treinado")
         save_path = st.text_input(
             "Caminho do arquivo",
             value="data/models/modelo_classificacao.joblib",
         )
-        if st.button("💾 Salvar"):
+        if st.button("Salvar"):
             try:
                 saved = salvar_modelo(modelo, tfidf, label_encoder, filepath=save_path)
-                st.success(f"✅ Modelo salvo com sucesso em: `{saved}`")
+                st.success(f"Modelo salvo com sucesso em: `{saved}`")
             except Exception as e:
-                st.error(f"❌ Erro ao salvar o modelo: {e}")
+                st.error(f"Erro ao salvar o modelo: {e}")

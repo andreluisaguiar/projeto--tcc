@@ -7,9 +7,9 @@ import streamlit as st
 from src.preprocessing.search import buscar_titulos_similares
 from src.utils.db import obter_todos_tccs
 
-st.set_page_config(page_title="Busca Semântica", page_icon="🔎", layout="wide")
+st.set_page_config(page_title="Busca Semântica", layout="wide")
 
-st.header("🔎 Busca Semântica de Títulos")
+st.header("Busca Semântica de Títulos")
 st.write(
     "Pesquise TCCs por similaridade semântica usando os vetores nativos do spaCy e a base persistida no SQLite."
 )

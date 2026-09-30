@@ -3,12 +3,19 @@
 import io
 
 import pandas as pd
+from selenium.common.exceptions import (
+    NoAlertPresentException,
+    TimeoutException,
+    UnexpectedAlertPresentException,
+)
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from src.scraping.driver import criar_driver
 from src.utils.logging_config import logger
+
+ALERTA_BOTAO_VOLTAR = "botão voltar"
 
 
 def scrape_monografias(url: str) -> io.BytesIO | None:
@@ -41,19 +48,52 @@ def scrape_monografias(url: str) -> io.BytesIO | None:
         logger.info("Acessando URL: %s", url)
         driver.get(url)
 
+        alerta_inicial = _aceitar_alerta_se_existir(driver)
+        if alerta_inicial:
+            logger.warning("Alerta exibido pelo SIGAA ao abrir a página: %s", alerta_inicial)
+            if ALERTA_BOTAO_VOLTAR in alerta_inicial.lower():
+                raise RuntimeError(
+                    "O SIGAA recusou a URL informada com o aviso de uso do botão voltar. "
+                    "Abra a página pública do curso pelo próprio SIGAA e copie a URL completa "
+                    "da tela de monografias, incluindo os parâmetros da URL, como 'id=...'."
+                )
+
         # O SIGAA exige ao menos um critério. Usamos título coringa para listar
         # todas as monografias disponíveis na página do curso.
         wait = WebDriverWait(driver, 20)
-        wait.until(EC.element_to_be_clickable((By.ID, "form:checkTitulo"))).click()
+        try:
+            wait.until(EC.element_to_be_clickable((By.ID, "form:checkTitulo"))).click()
+        except UnexpectedAlertPresentException as exc:
+            alerta = _aceitar_alerta_se_existir(driver) or str(exc)
+            raise RuntimeError(_mensagem_alerta_sigaa(alerta)) from exc
+        except TimeoutException as exc:
+            raise RuntimeError(
+                "Não encontrei o formulário de busca de monografias nessa página. "
+                "Verifique se a URL é a tela pública de monografias de um curso específico "
+                "do SIGAA, e não apenas a URL genérica 'monografias_curso.jsf'."
+            ) from exc
+
         titulo_input = wait.until(EC.presence_of_element_located((By.ID, "form:titulo")))
         titulo_input.clear()
         titulo_input.send_keys("%")
 
         search_button = wait.until(EC.element_to_be_clickable((By.ID, "form:buscar")))
         search_button.click()
+        alerta_busca = _aceitar_alerta_se_existir(driver)
+        if alerta_busca:
+            raise RuntimeError(_mensagem_alerta_sigaa(alerta_busca))
 
         # Aguardando a tela carregar
-        wait.until(lambda browser: len(browser.find_elements(By.CSS_SELECTOR, "table.table_lt")) > 0)
+        try:
+            wait.until(lambda browser: len(browser.find_elements(By.CSS_SELECTOR, "table.table_lt")) > 0)
+        except UnexpectedAlertPresentException as exc:
+            alerta = _aceitar_alerta_se_existir(driver) or str(exc)
+            raise RuntimeError(_mensagem_alerta_sigaa(alerta)) from exc
+        except TimeoutException as exc:
+            raise RuntimeError(
+                "A busca foi enviada, mas a tabela de monografias não apareceu. "
+                "Tente novamente com a URL completa do curso no SIGAA ou reduza o critério de busca."
+            ) from exc
 
         # Localizar a tabela de monografias
         table = driver.find_element(By.CSS_SELECTOR, "table.table_lt")
@@ -117,3 +157,27 @@ def _extrair_dados_tabela(rows: list) -> list[list[str]]:
             data.append([ano, date, aluno, orientador, curso, titulo])
 
     return data
+
+
+def _aceitar_alerta_se_existir(driver) -> str | None:
+    """Aceita um alerta JavaScript aberto e retorna seu texto, se existir."""
+    try:
+        alert = driver.switch_to.alert
+        texto = alert.text
+        alert.accept()
+        return texto
+    except NoAlertPresentException:
+        return None
+
+
+def _mensagem_alerta_sigaa(alerta: str) -> str:
+    """Converte alertas conhecidos do SIGAA em mensagens acionáveis."""
+    if ALERTA_BOTAO_VOLTAR in alerta.lower():
+        return (
+            "O SIGAA interrompeu a coleta com o aviso de uso do botão voltar. "
+            "Isso costuma acontecer quando a URL é genérica ou perdeu os parâmetros "
+            "da sessão do curso. Acesse o curso pelo SIGAA, entre em Monografias e "
+            "copie a URL completa da página, incluindo parâmetros como 'id=...'."
+        )
+
+    return f"O SIGAA exibiu um alerta e interrompeu a coleta: {alerta}"

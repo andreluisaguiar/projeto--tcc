@@ -9,14 +9,13 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Projeto TCC — NLP para Engenharia",
-    page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ─── Home Page ────────────────────────────────────────────────────────────────
 
-st.title("🎓 Projeto TCC")
+st.title("Projeto TCC")
 st.subheader(
     "Utilizando Processamento de Linguagem Natural para Prever a Escolha "
     "de Engenharia a Partir de Títulos de TCC no BICT"
@@ -25,25 +24,26 @@ st.subheader(
 st.divider()
 
 st.markdown("""
-## 🚀 Como usar
+## Como usar
 
 Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
 
 | Página | Descrição |
 |---|---|
-| ⚙️ **Gerenciamento de Dados** | Importe a base uma vez e mantenha os dados no SQLite |
-| 📊 **Dashboard** | Explore estatísticas interativas e nuvem de palavras dos temas |
-| 📥 **Coleta** | Extraia monografias diretamente do SIGAA |
-| 🧹 **Duplicatas** | Combine arquivos e remova registros duplicados |
-| 🔍 **Outliers** | Detecte títulos inconsistentes via similaridade semântica |
-| 🔎 **Busca Semântica** | Pesquise títulos por similaridade com spaCy |
-| 🧪 **Treinamento e Teste** | Compare algoritmos de ML com diferentes configurações |
-| 🎯 **Predição** | Treine modelos e preveja engenharias por título |
-| 🧾 **Relatórios** | Exporte um PDF consolidado com estatísticas do projeto |
+| **Gerenciamento de Dados** | Importe a base uma vez e mantenha os dados no SQLite |
+| **Dashboard** | Explore estatísticas interativas e nuvem de palavras dos temas |
+| **Coleta** | Extraia monografias diretamente do SIGAA |
+| **Duplicatas** | Combine arquivos e remova registros duplicados |
+| **Outliers** | Detecte títulos inconsistentes via similaridade semântica |
+| **Busca Semântica** | Pesquise títulos por similaridade com spaCy |
+| **Orientador e Tema** | Descubra orientadores recorrentes, áreas inferidas e ideias de tema |
+| **Treinamento e Teste** | Compare algoritmos de ML com diferentes configurações |
+| **Predição** | Treine modelos e preveja engenharias por título |
+| **Relatórios** | Exporte um PDF consolidado com estatísticas do projeto |
 
 ---
 
-## 📊 Pipeline do Projeto
+## Pipeline do Projeto
 
 ```
    Coleta (SIGAA)
@@ -66,7 +66,7 @@ Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 - **Interface**: Streamlit
 - **ML/NLP**: scikit-learn, XGBoost, spaCy, NLTK
@@ -77,6 +77,6 @@ Navegue pelas funcionalidades usando o **menu lateral** à esquerda:
 """)
 
 # Sidebar info
-st.sidebar.success("👆 Selecione uma página acima.")
+st.sidebar.success("Selecione uma página acima.")
 st.sidebar.divider()
 st.sidebar.markdown("**Projeto de TCC** — UFMA")

@@ -4,13 +4,13 @@ Aplicação que utiliza **Processamento de Linguagem Natural (NLP)** para prever
 
 ## 📋 Funcionalidades
 
-| Funcionalidade | Descrição |
-|---|---|
-| **Coleta de Dados** | Web scraping automatizado do SIGAA para extrair monografias |
-| **Remoção de Duplicatas** | Merge de múltiplos arquivos Excel com deduplicação |
-| **Detecção de Outliers** | Análise semântica com spaCy para identificar títulos inconsistentes |
-| **Treinamento e Teste** | Comparação de 6 algoritmos de ML (RF, NB, SVM, KNN, DT, XGBoost) |
-| **Treinamento e Predição** | Pipeline completo com SMOTE + previsão de engenharia por título |
+| Funcionalidade                     | Descrição                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| **Coleta de Dados**          | Web scraping automatizado do SIGAA para extrair monografias            |
+| **Remoção de Duplicatas**  | Merge de múltiplos arquivos Excel com deduplicação                  |
+| **Detecção de Outliers**   | Análise semântica com spaCy para identificar títulos inconsistentes |
+| **Treinamento e Teste**      | Comparação de 6 algoritmos de ML (RF, NB, SVM, KNN, DT, XGBoost)     |
+| **Treinamento e Predição** | Pipeline completo com SMOTE + previsão de engenharia por título      |
 
 ## 🛠️ Stack Tecnológica
 

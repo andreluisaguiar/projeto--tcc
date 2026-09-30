@@ -5,9 +5,9 @@ import pandas as pd
 from src.preprocessing.deduplication import remover_duplicatas
 from src.utils.io_helpers import merge_excel_files, dataframe_to_excel_buffer
 
-st.set_page_config(page_title="Remoção de Duplicatas", page_icon="🧹")
+st.set_page_config(page_title="Remoção de Duplicatas")
 
-st.header("🧹 Remoção de Duplicatas")
+st.header("Remoção de Duplicatas")
 st.write(
     "Carregue um ou mais arquivos Excel para combinar e remover registros duplicados."
 )
@@ -15,7 +15,7 @@ st.write(
 st.divider()
 
 uploaded_files = st.file_uploader(
-    "📁 Carregar arquivos Excel",
+    "Carregar arquivos Excel",
     type=["xlsx"],
     accept_multiple_files=True,
 )
@@ -34,29 +34,29 @@ def cached_remover_duplicatas(df: pd.DataFrame) -> pd.DataFrame:
 
 if uploaded_files:
     # Usamos os nomes dos arquivos e tamanhos como chave estável para o cache
-    file_keys = [f"{f.name}_{f.size}" for f in uploaded_files]
+    file_keys = [f"{f.name}_{f.size}"for f in uploaded_files]
     with st.spinner("Carregando e combinando arquivos..."):
         df_combinado = cached_merge_excel_files(file_keys, uploaded_files)
 
-    st.subheader(f"📊 Dados Combinados ({len(df_combinado)} linhas)")
+    st.subheader(f"Dados Combinados ({len(df_combinado)} linhas)")
     st.dataframe(df_combinado, use_container_width=True)
 
-    if st.button("🧹 Remover Duplicatas", type="primary"):
+    if st.button("Remover Duplicatas", type="primary"):
         df_sem_duplicatas = cached_remover_duplicatas(df_combinado)
         removidas = len(df_combinado) - len(df_sem_duplicatas)
 
         if removidas > 0:
-            st.success(f"✅ {removidas} duplicatas removidas!")
+            st.success(f"{removidas} duplicatas removidas!")
         else:
-            st.info("ℹ️ Nenhuma duplicata encontrada.")
+            st.info("ℹ Nenhuma duplicata encontrada.")
 
-        st.subheader(f"📊 Dados sem Duplicatas ({len(df_sem_duplicatas)} linhas)")
+        st.subheader(f"Dados sem Duplicatas ({len(df_sem_duplicatas)} linhas)")
         st.dataframe(df_sem_duplicatas, use_container_width=True)
 
         # Download
         buffer = dataframe_to_excel_buffer(df_sem_duplicatas)
         st.download_button(
-            label="📄 Baixar Arquivo sem Duplicatas",
+            label="Baixar Arquivo sem Duplicatas",
             data=buffer,
             file_name="dataset_sem_duplicatas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

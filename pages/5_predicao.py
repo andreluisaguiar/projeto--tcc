@@ -11,9 +11,9 @@ from src.models.trainer import calcular_probabilidades_combinadas, treinar_pipel
 from src.utils.db import obter_todos_tccs
 from src.utils.io_helpers import dataframe_to_excel_buffer, read_excel
 
-st.set_page_config(page_title="Treinamento e Predição", page_icon="🎯")
+st.set_page_config(page_title="Treinamento e Predição")
 
-st.header("🎯 Treinamento e Predição")
+st.header("Treinamento e Predição")
 st.write(
     "Treine modelos (Random Forest + XGBoost) e faça predições de engenharia com base no título da monografia."
 )
@@ -23,7 +23,7 @@ st.divider()
 data_db = obter_todos_tccs(incluir_outliers=False, incluir_duplicadas=False)
 uploaded_file = None
 if data_db.empty:
-    uploaded_file = st.file_uploader("📁 Envie o arquivo Excel", type=["xlsx"])
+    uploaded_file = st.file_uploader("Envie o arquivo Excel", type=["xlsx"])
 
 
 @st.cache_resource
@@ -40,35 +40,35 @@ if df is None:
     st.info("Carregue a base no SQLite pela página de Gerenciamento ou envie um arquivo Excel para continuar.")
     st.stop()
 
-if "titulo" not in df.columns or "engenharia" not in df.columns:
-    st.error("❌ O arquivo deve conter as colunas 'titulo' e 'engenharia'.")
+if "titulo"not in df.columns or "engenharia"not in df.columns:
+    st.error("O arquivo deve conter as colunas 'titulo' e 'engenharia'.")
     st.stop()
 
-st.info(f"📊 {len(df)} registros carregados")
+st.info(f"{len(df)} registros carregados")
 
-st.subheader("📊 Distribuição das Engenharias")
+st.subheader("Distribuição das Engenharias")
 st.bar_chart(df["engenharia"].value_counts())
 
 resultado = st.session_state.get("resultado_predicao")
 
-if st.button("🚀 Treinar Modelos", type="primary"):
+if st.button("Treinar Modelos", type="primary"):
     with st.spinner("Treinando/Carregando modelos (Random Forest + XGBoost)..."):
         try:
             resultado = cached_treinar_pipeline_predicao(df)
             st.session_state["resultado_predicao"] = resultado
         except ValueError as e:
-            st.error(f"❌ {e}")
+            st.error(f"{e}")
             st.stop()
 
 if resultado is not None:
-    st.success("✅ Treinamento concluído!")
+    st.success("Treinamento concluído!")
 
     for algo, res in resultado["resultados"].items():
-        if "erro" in res:
-            st.error(f"❌ {res['nome']}: {res['erro']}")
+        if "erro"in res:
+            st.error(f"{res['nome']}: {res['erro']}")
             continue
 
-        st.subheader(f"📈 {res['nome']}")
+        st.subheader(f"{res['nome']}")
         col1, col2 = st.columns(2)
         with col1:
             st.metric("Acurácia CV", f"{res['acuracia_cv']:.2%}")
@@ -77,11 +77,11 @@ if resultado is not None:
 
     if resultado["melhor_algoritmo"]:
         melhor = resultado["resultados"][resultado["melhor_algoritmo"]]
-        st.subheader(f"🏆 Melhor Modelo: {melhor['nome']}")
+        st.subheader(f"Melhor Modelo: {melhor['nome']}")
         relatorio_df = relatorio_para_dataframe(melhor["relatorio"])
         st.dataframe(relatorio_df, use_container_width=True)
 
-    st.subheader("📊 Dados com Probabilidades")
+    st.subheader("Dados com Probabilidades")
     prob_df = calcular_probabilidades_combinadas(
         resultado["modelos"],
         resultado["X_tfidf_completo"],
@@ -92,7 +92,7 @@ if resultado is not None:
 
     buffer = dataframe_to_excel_buffer(dados_prob)
     st.download_button(
-        label="📄 Baixar Dados com Probabilidades",
+        label="Baixar Dados com Probabilidades",
         data=buffer,
         file_name="dados_com_probabilidades.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -100,7 +100,7 @@ if resultado is not None:
     )
 
 st.divider()
-st.subheader("🔮 Predição por Título")
+st.subheader("Predição por Título")
 
 if resultado is not None:
     titulo_input = st.text_input(
@@ -127,6 +127,6 @@ if resultado is not None:
 
         eng_predita = prob_titulo["Média"].idxmax()
         prob_max = prob_titulo["Média"].max()
-        st.success(f"🎯 Engenharia predita: **{eng_predita}** (confiança: {prob_max:.1%})")
+        st.success(f"Engenharia predita: **{eng_predita}** (confiança: {prob_max:.1%})")
 else:
-    st.info("ℹ️ Treine os modelos primeiro para usar a predição por título.")
+    st.info("ℹ Treine os modelos primeiro para usar a predição por título.")

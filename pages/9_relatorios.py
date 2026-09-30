@@ -8,9 +8,9 @@ import streamlit as st
 from src.utils.db import obter_todos_tccs
 from src.utils.pdf_generator import gerar_relatorio_pdf
 
-st.set_page_config(page_title="Relatórios PDF", page_icon="🧾", layout="wide")
+st.set_page_config(page_title="Relatórios PDF", layout="wide")
 
-st.header("🧾 Relatórios PDF")
+st.header("Relatórios PDF")
 st.write(
     "Gere um relatório executivo com estatísticas consolidadas a partir da base SQLite."
 )

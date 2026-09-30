@@ -12,9 +12,9 @@ from src.preprocessing.text_processor import get_portuguese_stopwords
 from src.utils.db import obter_todos_tccs
 from src.utils.io_helpers import read_excel
 
-st.set_page_config(page_title="Dashboard Analítico", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Dashboard Analítico", layout="wide")
 
-st.header("📊 Dashboard Analítico Interativo")
+st.header("Dashboard Analítico Interativo")
 st.write(
     "Explore estatísticas descritivas, nuvem de palavras de temas por engenharia, "
     "orientadores mais populares e evolução temporal de monografias no BICT."
@@ -26,10 +26,10 @@ df = None
 df_db = obter_todos_tccs(incluir_outliers=False, incluir_duplicadas=False)
 if not df_db.empty:
     df = df_db
-    st.info(f"📊 Carregados {len(df)} registros limpos diretamente do SQLite.")
+    st.info(f"Carregados {len(df)} registros limpos diretamente do SQLite.")
 else:
     uploaded_file = st.file_uploader(
-        "📁 Envie o arquivo Excel para análise descritiva",
+        "Envie o arquivo Excel para análise descritiva",
         type=["xlsx"],
         help="Envie um dataset de monografias limpo ou processado para gerar os gráficos.",
     )
@@ -64,15 +64,15 @@ if df is not None:
     colunas_presentes = [c for c in colunas_obrigatorias if c in df.columns]
     
     if not colunas_presentes:
-        st.error("❌ O arquivo precisa conter pelo menos a coluna 'titulo' ou 'título'.")
+        st.error("O arquivo precisa conter pelo menos a coluna 'titulo' ou 'título'.")
         st.stop()
         
     # Preencher colunas ausentes comuns com valores genéricos para não falhar a renderização
-    if "ano" not in df.columns:
+    if "ano"not in df.columns:
         df["ano"] = "Não Informado"
-    if "orientador" not in df.columns:
+    if "orientador"not in df.columns:
         df["orientador"] = "Não Informado"
-    if "engenharia" not in df.columns:
+    if "engenharia"not in df.columns:
         df["engenharia"] = "Geral"
 
     # Limpar dados
@@ -81,7 +81,7 @@ if df is not None:
     df["engenharia"] = df["engenharia"].astype(str).str.strip()
 
     # ─── Filtros Interativos na Barra Lateral ───────────────────────────────
-    st.sidebar.header("🎯 Filtros Interativos")
+    st.sidebar.header("Filtros Interativos")
     
     # Filtro por Engenharia/Curso
     engenharias_disponiveis = sorted(df["engenharia"].unique())
@@ -106,7 +106,7 @@ if df is not None:
     ]
 
     if df_filtrado.empty:
-        st.warning("⚠️ Nenhum registro encontrado com os filtros selecionados.")
+        st.warning("Nenhum registro encontrado com os filtros selecionados.")
         st.stop()
 
     # ─── KPIS Principais ──────────────────────────────────────────────────
@@ -127,7 +127,7 @@ if df is not None:
     col_chart1, col_chart2 = st.columns(2)
     
     with col_chart1:
-        st.subheader("📅 Evolução Temporal de Publicações")
+        st.subheader("Evolução Temporal de Publicações")
         df_temporal = df_filtrado.groupby(["ano", "engenharia"]).size().reset_index(name="Quantidade")
         df_temporal = df_temporal.sort_values("ano")
         fig_temporal = px.bar(
@@ -143,7 +143,7 @@ if df is not None:
         st.plotly_chart(fig_temporal, use_container_width=True)
         
     with col_chart2:
-        st.subheader("👨‍🏫 Top 10 Orientadores")
+        st.subheader("‍ Top 10 Orientadores")
         df_orientadores = df_filtrado["orientador"].value_counts().reset_index()
         df_orientadores.columns = ["Orientador", "Quantidade"]
         top_orientadores = df_orientadores.head(10)
@@ -163,7 +163,7 @@ if df is not None:
     st.divider()
 
     # ─── Análise de Temas por Nuvem de Palavras ─────────────────────────────
-    st.subheader("☁️ Nuvem de Palavras por Engenharia (Word Cloud)")
+    st.subheader("Nuvem de Palavras por Engenharia (Word Cloud)")
     st.write(
         "Veja visualmente quais termos e temas são mais recorrentes nos títulos dos TCCs."
     )
@@ -218,10 +218,10 @@ if df is not None:
                 plt.tight_layout(pad=0)
                 st.pyplot(fig_wc)
         else:
-            st.info("ℹ️ Não há títulos suficientes para gerar a nuvem de palavras.")
+            st.info("ℹ Não há títulos suficientes para gerar a nuvem de palavras.")
             
 else:
-    st.info("💡 Por favor, envie um arquivo Excel na barra superior para iniciar o dashboard!")
+    st.info("Por favor, envie um arquivo Excel na barra superior para iniciar o dashboard!")
     
     # Mostrar um exemplo visual se houver arquivos em data/raw/
     import os
@@ -232,7 +232,7 @@ else:
         excel_files = list(data_raw_dir.glob("*.xlsx"))
         if excel_files:
             st.write("---")
-            st.subheader("📂 Arquivos de exemplo detectados:")
+            st.subheader("Arquivos de exemplo detectados:")
             st.write("Você pode testar usando um dos arquivos já disponíveis na pasta de dados:")
             for f in excel_files:
                 st.info(f"Caminho do arquivo: `{f}`")
